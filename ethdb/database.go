@@ -37,15 +37,17 @@ type LDBDatabase struct {
 	fn string      // filename for reporting
 	db *leveldb.DB // LevelDB instance
 
-	getTimer       metrics.Timer // Timer for measuring the database get request counts and latencies
-	putTimer       metrics.Timer // Timer for measuring the database put request counts and latencies
-	delTimer       metrics.Timer // Timer for measuring the database delete request counts and latencies
-	missMeter      metrics.Meter // Meter for measuring the missed database get requests
-	readMeter      metrics.Meter // Meter for measuring the database get request data usage
-	writeMeter     metrics.Meter // Meter for measuring the database put request data usage
-	compTimeMeter  metrics.Meter // Meter for measuring the total time spent in database compaction
-	compReadMeter  metrics.Meter // Meter for measuring the data read during compaction
-	compWriteMeter metrics.Meter // Meter for measuring the data written during compaction
+	getTimer       		metrics.Timer // Timer for measuring the database get request counts and latencies
+	putTimer       		metrics.Timer // Timer for measuring the database put request counts and latencies
+	delTimer       		metrics.Timer // Timer for measuring the database delete request counts and latencies
+	missMeter      		metrics.Meter // Meter for measuring the missed database get requests
+	readMeter      		metrics.Meter // Meter for measuring the database get request data usage
+	writeMeter     		metrics.Meter // Meter for measuring the database put request data usage
+	readCountMeter      metrics.Meter // Meter for measuring the database get request data usage
+	writeCountMeter     metrics.Meter // Meter for measuring the database put request data usage
+	compTimeMeter  		metrics.Meter // Meter for measuring the total time spent in database compaction
+	compReadMeter  		metrics.Meter // Meter for measuring the data read during compaction
+	compWriteMeter 		metrics.Meter // Meter for measuring the data written during compaction
 
 	quitLock sync.Mutex      // Mutex protecting the quit channel access
 	quitChan chan chan error // Quit channel to stop the metrics collection before closing the database
@@ -103,6 +105,9 @@ func (db *LDBDatabase) Put(key []byte, value []byte) error {
 
 	if db.writeMeter != nil {
 		db.writeMeter.Mark(int64(len(value)))
+	}
+	if db.writeCountMeter != nil {
+		db.writeCountMeter.Mark(1)
 	}
 	return db.db.Put(key, value, nil)
 }
@@ -184,6 +189,8 @@ func (db *LDBDatabase) Meter(prefix string) {
 	db.missMeter = metrics.NewRegisteredMeter(prefix+"user/misses", nil)
 	db.readMeter = metrics.NewRegisteredMeter(prefix+"user/reads", nil)
 	db.writeMeter = metrics.NewRegisteredMeter(prefix+"user/writes", nil)
+	db.readCountMeter = metrics.NewRegisteredMeter(prefix+"user/readscount", nil)
+	db.writeCountMeter = metrics.NewRegisteredMeter(prefix+"user/writescount", nil)
 	db.compTimeMeter = metrics.NewRegisteredMeter(prefix+"compact/time", nil)
 	db.compReadMeter = metrics.NewRegisteredMeter(prefix+"compact/input", nil)
 	db.compWriteMeter = metrics.NewRegisteredMeter(prefix+"compact/output", nil)
