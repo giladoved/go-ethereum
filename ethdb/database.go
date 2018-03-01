@@ -134,6 +134,9 @@ func (db *LDBDatabase) Get(key []byte) ([]byte, error) {
 	if db.readMeter != nil {
 		db.readMeter.Mark(int64(len(dat)))
 	}
+	if db.readCountMeter != nil {
+		db.readCountMeter.Mark(1)
+	}
 	return dat, nil
 	//return rle.Decompress(dat)
 }
