@@ -21,6 +21,7 @@ import (
 	"errors"
 	"math/big"
 	"time"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/bitutil"
@@ -98,7 +99,13 @@ type ChtNode struct {
 func GetChtRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
+
+	fmt.Printf("\nlight/postprocess.go > [BEFORE] Getting CHT root!!!\n%s\n", db.Metrics())
+
 	data, _ := db.Get(append(append(chtPrefix, encNumber[:]...), sectionHead.Bytes()...))
+
+	fmt.Printf("light/postprocess.go > [AFTER] Getting CHT root!!!\n%s\n\n", db.Metrics())
+
 	return common.BytesToHash(data)
 }
 
@@ -201,6 +208,9 @@ var (
 func GetBloomTrieRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
+
+	fmt.Print("light/postprocess.go > Getting bloom trie root!!!\n")
+
 	data, _ := db.Get(append(append(bloomTriePrefix, encNumber[:]...), sectionHead.Bytes()...))
 	return common.BytesToHash(data)
 }

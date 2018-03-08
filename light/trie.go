@@ -70,6 +70,9 @@ func (db *odrDatabase) ContractCode(addrHash, codeHash common.Hash) ([]byte, err
 	if codeHash == sha3_nil {
 		return nil, nil
 	}
+
+	fmt.Print("light/trie.go > Getting Contract Code!!!\n")
+
 	if code, err := db.backend.Database().Get(codeHash[:]); err == nil {
 		return code, nil
 	}

@@ -33,6 +33,7 @@ type Database interface {
 	Delete(key []byte) error
 	Close()
 	NewBatch() Batch
+	Metrics() string
 }
 
 // Batch is a write-only database that commits changes to its host database

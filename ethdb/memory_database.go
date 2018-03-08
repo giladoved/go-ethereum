@@ -90,6 +90,10 @@ func (db *MemDatabase) Delete(key []byte) error {
 
 func (db *MemDatabase) Close() {}
 
+func (db *MemDatabase) Metrics() string {
+	return "Metrics not implemented for MemDatabase"
+}
+
 func (db *MemDatabase) NewBatch() Batch {
 	return &memBatch{db: db}
 }

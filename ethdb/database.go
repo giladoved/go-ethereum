@@ -55,6 +55,9 @@ type LDBDatabase struct {
 	log log.Logger // Contextual logger tracking the database path
 }
 
+
+
+
 // NewLDBDatabase returns a LevelDB wrapped object.
 func NewLDBDatabase(file string, cache int, handles int) (*LDBDatabase, error) {
 	logger := log.New("database", file)
@@ -92,6 +95,25 @@ func NewLDBDatabase(file string, cache int, handles int) (*LDBDatabase, error) {
 // Path returns the path to the database directory.
 func (db *LDBDatabase) Path() string {
 	return db.fn
+}
+
+// Accessor for internal metrics
+func (db *LDBDatabase) Metrics() string {
+	metricsString := "Metrics <"
+
+	if db.readCountMeter != nil {
+		metricsString += "Read Count: " + strconv.FormatInt(db.readCountMeter.Count(), 10)
+	}
+	if db.writeCountMeter != nil {
+		metricsString += " | Write Count: " + strconv.FormatInt(db.writeCountMeter.Count(), 10)
+	}
+	if db.readMeter != nil {
+		metricsString += " | Read Bytes: " + strconv.FormatInt(db.readMeter.Count(), 10)
+	}
+	if db.writeMeter != nil {
+		metricsString += " | Write Bytes: " + strconv.FormatInt(db.writeMeter.Count(), 10)
+	}
+	return metricsString + ">"
 }
 
 // Put puts the given key / value to the queue
@@ -344,6 +366,10 @@ func (dt *table) Delete(key []byte) error {
 
 func (dt *table) Close() {
 	// Do nothing; don't close the underlying DB.
+}
+
+func (dt *table) Metrics() string {
+	return "Metrics not implemented for table"
 }
 
 type tableBatch struct {
