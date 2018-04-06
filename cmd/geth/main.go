@@ -149,7 +149,7 @@ var (
 // PINEAPPLE 0
 func init() {
 	// Initialize the CLI app and start Geth
-	app.Action = geth
+	app.Action = glient
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2017 The go-ethereum Authors"
 	app.Commands = []cli.Command{
@@ -215,13 +215,21 @@ func main() {
 // geth is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
-// PINEAPPLE 1
 func geth(ctx *cli.Context) error {
 	node := makeFullNode(ctx)
 	startNode(ctx, node)
 	node.Wait()
 	return nil
 }
+
+// PINEAPPLE 1
+func glient(ctx *cli.Context) error {
+	node := makeFullNode(ctx)
+	// StartNode calls some additional setup commands we don't really need in the Glient
+	utils.StartNode(node)
+	return nil
+}
+
 
 // startNode boots up the system node and all registered protocols, after which
 // it unlocks any requested accounts, and starts the RPC/IPC interfaces and the

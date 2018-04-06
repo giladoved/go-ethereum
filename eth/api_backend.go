@@ -36,6 +36,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
+// PINEAPPLE 6 - The Backend Ethereum API
+
 // EthApiBackend implements ethapi.Backend for full nodes
 type EthApiBackend struct {
 	eth *Ethereum

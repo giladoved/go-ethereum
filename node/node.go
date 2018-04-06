@@ -212,9 +212,6 @@ func (n *Node) Start() error {
 		started = append(started, kind)
 	}
 
-
-	// PINEAPPLE 7 - start rpc, replace this with direct calls instead?
-
 	// Lastly start the configured RPC interfaces
 	if err := n.startRPC(services); err != nil {
 		for _, service := range services {
@@ -253,6 +250,7 @@ func (n *Node) openDataDir() error {
 // startRPC is a helper method to start all the various RPC endpoint during node
 // startup. It's not meant to be called at any time afterwards as it makes certain
 // assumptions about the state of the node.
+// PINEAPPLE 7 - Possibly unnecessary node setup for the Glient
 func (n *Node) startRPC(services map[reflect.Type]Service) error {
 	// Gather all the possible APIs to surface
 	apis := n.apis()

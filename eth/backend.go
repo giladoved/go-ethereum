@@ -180,9 +180,14 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	eth.ApiBackend.gpo = gasprice.NewOracle(eth.ApiBackend, gpoParams)
 
-	fmt.Printf("~~~~~~~~~~~~~~~~~~~\n\n\n\n")
-	fmt.Printf("%+v\n\n", eth.ApiBackend.CurrentBlock())
-	fmt.Printf("damn")
+	// PINEAPPLES IN PLACE, TEST THE GLIENT RIGHT HERE //
+
+	testA(eth.ApiBackend)
+
+	apis := eth.APIs()
+
+	testB(apis[3])
+
 
 	return eth, nil
 }
@@ -249,6 +254,7 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *ethash.Config, chai
 
 // APIs returns the collection of RPC services the ethereum package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
+// PINEAPPLE 6X - Additional Ethereum APIs
 func (s *Ethereum) APIs() []rpc.API {
 	apis := ethapi.GetAPIs(s.ApiBackend)
 
