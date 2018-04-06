@@ -1,20 +1,23 @@
 package eth
 
 import (
-	"fmt",
-	""
+	"fmt"
+	"github.com/ethereum/go-ethereum/fraternal/ethapi"
 )
 
 func testA(eth *Ethereum) {
 
-	//fmt.Printf("%v, %v", i, v)
 	pubServAPI := PublicEthereumAPI{eth}
-	pubBlockChainApi := NewPublicBlockChainAPI(eth)
-	BlockNumber(eth)
+
+	pubBlockChainApi := ethapi.NewPublicBlockChainAPI(eth.ApiBackend)
+
+	blockNum := pubBlockChainApi.BlockNumber()
+
 	ethAd, _ := pubServAPI.Etherbase()
 	coinAd, _ := pubServAPI.Coinbase()
 	pubAd := pubServAPI.Hashrate()
-	fmt.Printf("%v\n%v\n%v", ethAd, coinAd, pubAd)
+
+	fmt.Printf("%v\n%v\n%v\n%v\n", ethAd, coinAd, pubAd, blockNum)
 
 	//fmt.Printf("~~~~~~~~~~~~~~~~~~~\n\n\n\n")
 	//fmt.Printf("%+v\n\n", backend.CurrentBlock())
@@ -22,8 +25,11 @@ func testA(eth *Ethereum) {
 	//
 }
 
-//func testB(somePublicAPI *) {
-//
-//
-//
-//}
+func testB(eth *Ethereum) {
+
+	//am := accounts.NewManager(eth.ApiBackend)
+
+
+
+}
+
