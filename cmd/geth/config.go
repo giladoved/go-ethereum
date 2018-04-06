@@ -150,6 +150,7 @@ func enableWhisper(ctx *cli.Context) bool {
 	return false
 }
 
+// PINEAPPLE 2
 func makeFullNode(ctx *cli.Context) *node.Node {
 	stack, cfg := makeConfigNode(ctx)
 

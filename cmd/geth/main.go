@@ -146,6 +146,7 @@ var (
 	}
 )
 
+// PINEAPPLE 0
 func init() {
 	// Initialize the CLI app and start Geth
 	app.Action = geth
@@ -214,6 +215,7 @@ func main() {
 // geth is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
+// PINEAPPLE 1
 func geth(ctx *cli.Context) error {
 	node := makeFullNode(ctx)
 	startNode(ctx, node)
