@@ -211,6 +211,10 @@ func (n *Node) Start() error {
 		// Mark the service started for potential cleanup
 		started = append(started, kind)
 	}
+
+
+	// PINEAPPLE 7 - start rpc, replace this with direct calls instead?
+
 	// Lastly start the configured RPC interfaces
 	if err := n.startRPC(services); err != nil {
 		for _, service := range services {
@@ -252,6 +256,7 @@ func (n *Node) openDataDir() error {
 func (n *Node) startRPC(services map[reflect.Type]Service) error {
 	// Gather all the possible APIs to surface
 	apis := n.apis()
+
 	for _, service := range services {
 		apis = append(apis, service.APIs()...)
 	}

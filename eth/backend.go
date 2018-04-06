@@ -180,6 +180,10 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	eth.ApiBackend.gpo = gasprice.NewOracle(eth.ApiBackend, gpoParams)
 
+	fmt.Printf("~~~~~~~~~~~~~~~~~~~\n\n\n\n")
+	fmt.Printf("%+v\n\n", eth.ApiBackend.CurrentBlock())
+	fmt.Printf("damn")
+
 	return eth, nil
 }
 

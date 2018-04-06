@@ -107,6 +107,7 @@ func defaultNodeConfig() node.Config {
 	return cfg
 }
 
+//pineapple idk - makes a node, maybe we can insert the backend shit here somehow
 func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	// Load defaults.
 	cfg := gethConfig{
@@ -176,6 +177,8 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}
+
+
 	return stack
 }
 
