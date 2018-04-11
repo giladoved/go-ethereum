@@ -182,12 +182,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	// PINEAPPLES IN PLACE, TEST THE GLIENT RIGHT HERE //
 
-	testA(eth)
-
-	//apis := eth.APIs()
-
-	//testB(apis[3])
-
+	countAccounts(eth)
 
 	return eth, nil
 }
