@@ -116,6 +116,22 @@ func (db *LDBDatabase) Metrics() string {
 	return metricsString + ">"
 }
 
+func (db *LDBDatabase) MetricsDict() map[string]int64 {
+	metricsDict := make(map[string]int64)
+	metricsDict["user/gets"] = db.getTimer.Count() // Timer for measuring the database get request counts and latencies
+	metricsDict["user/puts"] = db.putTimer.Count() // Timer for measuring the database put request counts and latencies
+	metricsDict["user/dels"] = db.delTimer.Count() // Timer for measuring the database delete request counts and latencies
+	metricsDict["user/misses"] = db.missMeter.Count() // Meter for measuring the missed database get requests
+	metricsDict["user/reads"] = db.readMeter.Count()  // Meter for measuring the database get request data usage
+	metricsDict["user/writes"] = db.writeMeter.Count() // Meter for measuring the database put request data usage
+	metricsDict["user/readscount"] = db.readCountMeter.Count() // Meter for measuring the database get request data usage
+	metricsDict["user/writescount"] = db.writeCountMeter.Count() // Meter for measuring the database put request data usage
+	metricsDict["compact/time"] = db.compTimeMeter.Count() // Meter for measuring the total time spent in database compaction
+	metricsDict["compact/input"] = db.compReadMeter.Count() // Meter for measuring the data read during compaction
+	metricsDict["compact/output"] = db.compWriteMeter.Count() // Meter for measuring the data written during compaction
+	return metricsDict
+}
+
 // Put puts the given key / value to the queue
 func (db *LDBDatabase) Put(key []byte, value []byte) error {
 	// Measure the database put latency, if requested
