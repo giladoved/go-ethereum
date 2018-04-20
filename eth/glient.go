@@ -35,7 +35,6 @@ func testB(eth *Ethereum) {
 	//am := accounts.NewManager(eth.ApiBackend)
 }
 
-
 func countAccounts(eth *Ethereum) {
 	blockNum := 0
 	trans := 0
