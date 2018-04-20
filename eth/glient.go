@@ -35,6 +35,13 @@ func testB(eth *Ethereum) {
 	//am := accounts.NewManager(eth.ApiBackend)
 }
 
+// place the following on the first line of the function to time how long a function takes:
+// defer trackTimeOfFunction(time.Now(), "~~ Count Accounts ~~")
+func trackTimeOfFunction(start time.Time, name string) {
+	elapsed := time.Since(start)
+	fmt.Printf("%s took %s\n\n", name, elapsed)
+}
+
 func countAccounts(eth *Ethereum) {
 	blockNum := 0
 	trans := 0
@@ -45,13 +52,21 @@ func countAccounts(eth *Ethereum) {
 
 	printEvery := 100000
 
+	var startTimeTransactions = time.Now()
+	var startTimeBlocks = time.Now()
+	var startTimeAccounts = time.Now()
+	var elapsedTimeTransactions = time.Since(time.Now())
+	var elapsedTimeBlocks = time.Since(time.Now())
+	var elapsedTimeAccounts = time.Since(time.Now())
+
+	startTimeTransactions = time.Now()
 	for {
 		blck := blockNum
 		blockNum += 1
 
-		// if (blck > 200000) {
-		//     break
-		// }
+		//if (blck > 200000) {
+		//    break
+		//}
 
 		block := eth.blockchain.GetBlockByNumber(uint64(blck))
 		if block == nil {
@@ -60,12 +75,14 @@ func countAccounts(eth *Ethereum) {
 
 		trans = trans + block.Transactions().Len()
 
+		startTimeBlocks = time.Now()
 		for i := 0; i < block.Transactions().Len(); i++ {
 			transaction := block.Transactions()[i]
 			if transaction.Value().Sign() > 0 {
 				addresses[transaction.To()] = true
 			}
 		}
+		elapsedTimeBlocks = time.Since(startTimeBlocks)
 
 		blocks += 1
 
@@ -74,7 +91,8 @@ func countAccounts(eth *Ethereum) {
 				time.Now().String(), blocks, blck, trans, len(addresses))
 		}
 	}
-
+	elapsedTimeTransactions = time.Since(startTimeTransactions)
+	fmt.Printf("Total time to process blocks: %s Total time to process transactions: %s\n", elapsedTimeBlocks, elapsedTimeTransactions)
 	fmt.Printf("Total blocks processed: %v Total transactions: %v\n", blocks, trans)
 
 	//let positiveAddresses = []
@@ -85,6 +103,7 @@ func countAccounts(eth *Ethereum) {
 
 	publicBlockChainAPI := ethapi.NewPublicBlockChainAPI(eth.ApiBackend)
 
+	startTimeAccounts = time.Now()
 	for address := range addresses {
 		if address == nil {
 			fmt.Println(address)
@@ -98,9 +117,10 @@ func countAccounts(eth *Ethereum) {
 			positiveAddresses += 1
 		}
 	}
+	elapsedTimeAccounts = time.Since(startTimeAccounts)
 
+	fmt.Printf("%s Total time to process blocks: %s\n", time.Now().String(), elapsedTimeAccounts)
 	fmt.Printf("%s Number of accounts with positive balance: %v \n", time.Now().String(), positiveAddresses)
 	fmt.Printf("%s Exiting process.\n", time.Now().String())
-
 }
 
