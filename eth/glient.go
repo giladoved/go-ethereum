@@ -63,7 +63,7 @@ func countAccounts(eth *Ethereum) {
 	var elapsedTimeBlocks = time.Since(time.Now())
 	var elapsedTimeAccounts = time.Since(time.Now())
 
-	startTimeTransactions = time.Now()
+	startTimeBlocks = time.Now()
 	for {
 		blck := blockNum
 		blockNum += 1
@@ -79,23 +79,24 @@ func countAccounts(eth *Ethereum) {
 
 		trans = trans + block.Transactions().Len()
 
-		startTimeBlocks = time.Now()
+		startTimeTransactions = time.Now()
 		for i := 0; i < block.Transactions().Len(); i++ {
 			transaction := block.Transactions()[i]
 			if transaction.Value().Sign() > 0 {
 				addresses[transaction.To()] = true
 			}
 		}
-		elapsedTimeBlocks = time.Since(startTimeBlocks)
+		elapsedTimeTransactions += time.Since(startTimeTransactions)
 
 		blocks += 1
 
 		if blocks % printEvery == 0 {
+			fmt.Printf("%s Time to process blocks: %s. Time to process transactions: %s\n", now(), elapsedTimeBlocks, elapsedTimeTransactions)
 			fmt.Printf("%s %v blocks processed. Number of transactions til block number %v: %v transactions. Number of accounts: %v\n",
 				now(), blocks, blck, trans, len(addresses))
 		}
 	}
-	elapsedTimeTransactions = time.Since(startTimeTransactions)
+	elapsedTimeBlocks = time.Since(startTimeBlocks)
 	fmt.Printf("Total time to process blocks: %s Total time to process transactions: %s\n", elapsedTimeBlocks, elapsedTimeTransactions)
 	fmt.Printf("Total blocks processed: %v Total transactions: %v\n", blocks, trans)
 
@@ -121,7 +122,7 @@ func countAccounts(eth *Ethereum) {
 	}
 	elapsedTimeAccounts = time.Since(startTimeAccounts)
 
-	fmt.Printf("%s Total time to process blocks: %s\n", time.Now().String(), elapsedTimeAccounts)
+	fmt.Printf("%s Total time to process accounts: %s\n", time.Now().String(), elapsedTimeAccounts)
 	fmt.Printf("%s Number of accounts with positive balance: %v \n", time.Now().String(), positiveAddresses)
 	fmt.Printf("%s Exiting process.\n", time.Now().String())
 }
@@ -144,8 +145,16 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 
 	fmt.Printf("%s Starting to count accounts...\n", now())
 
+	var startTimeTransactions = time.Now()
+	var startTimeBlocks = time.Now()
+	var startTimeAccounts = time.Now()
+	var elapsedTimeTransactions = time.Since(time.Now())
+	var elapsedTimeBlocks = time.Since(time.Now())
+	var elapsedTimeAccounts = time.Since(time.Now())
+
 	var printEvery = 100000
 
+	startTimeBlocks = time.Now()
 	for {
 		blck := blockNum
 		blockNum += 1
@@ -168,6 +177,7 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 			zeroTransactionBlocks += 1
 		}
 
+		startTimeTransactions = time.Now()
 		for i := 0; i < block.Transactions().Len(); i++ {
 			transaction := block.Transactions()[i]
 
@@ -179,17 +189,20 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 				addresses[transaction.To()] = true
 			}
 		}
+		elapsedTimeTransactions += time.Since(startTimeTransactions)
 
 		blocks += 1
 
 		if blocks % printEvery == 0 {
+			fmt.Printf("%s Time to process blocks: %s. Time to process transactions: %s\n", now(), elapsedTimeBlocks, elapsedTimeTransactions)
 			fmt.Printf("%s %v blocks processed. Number of transactions til block number %v: %v transactions. Number of accounts: %v\n",
 				now(), blocks, blck, trans, len(addresses))
 			fmt.Printf("%s Get metrics - getBlockGets: %v, getTransactionGets: %v\n",
 				now(), getBlockGets, getTransactionGets)
 		}
 	}
-
+	elapsedTimeBlocks = time.Since(startTimeBlocks)
+	fmt.Printf("Total time to process blocks: %s Total time to process transactions: %s\n", elapsedTimeBlocks, elapsedTimeTransactions)
 	fmt.Printf("%s Total blocks processed: %v Total transactions: %v, Number of blocks with zero transactions: %v\n",
 		now(), blocks, trans, zeroTransactionBlocks)
 
@@ -199,6 +212,7 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 
 	publicBlockChainAPI := ethapi.NewPublicBlockChainAPI(eth.ApiBackend)
 
+	startTimeAccounts = time.Now()
 	for address := range addresses {
 		if address == nil {
 			fmt.Printf("??? Nil Address Found: %v\n", address)
@@ -219,7 +233,9 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 			positiveAddresses += 1
 		}
 	}
+	elapsedTimeAccounts = time.Since(startTimeAccounts)
 
+	fmt.Printf("%s Total time to process accounts: %s\n", time.Now().String(), elapsedTimeAccounts)
 	fmt.Printf("%s Get metrics - getBlockGets: %v, getTransactionGets: %v, getBalanceGets: %v\n",
 		now(), getBlockGets, getTransactionGets, getBalanceGets)
 	fmt.Printf("%s Number of accounts with positive balance: %v \n", now(), positiveAddresses)
@@ -235,8 +251,14 @@ func countTransactions(eth *Ethereum) {
 
 	fmt.Printf("%s Starting to count transactions...\n", now())
 
+	var startTimeTransactions = time.Now()
+	var startTimeBlocks = time.Now()
+	var elapsedTimeTransactions = time.Since(time.Now())
+	var elapsedTimeBlocks = time.Since(time.Now())
+
 	var printEvery = 10000
 
+	startTimeBlocks = time.Now()
 	for {
 		blck := blockNum
 		blockNum += 1
@@ -246,7 +268,9 @@ func countTransactions(eth *Ethereum) {
 			break
 		}
 
+		startTimeTransactions = time.Now()
 		trans = trans + block.Transactions().Len()
+		elapsedTimeTransactions = time.Since(startTimeTransactions)
 
 		blocks += 1
 
@@ -255,7 +279,8 @@ func countTransactions(eth *Ethereum) {
 				now(), blocks, blck, trans)
 		}
 	}
-
+	elapsedTimeBlocks = time.Since(startTimeBlocks)
+	fmt.Printf("Total time to process blocks: %s Total time to process transactions: %s\n", elapsedTimeBlocks, elapsedTimeTransactions)
 	fmt.Printf("Total blocks processed: %v Total transactions: %v\n", blocks, trans)
 	fmt.Printf("%s Exiting process.\n", now())
 
