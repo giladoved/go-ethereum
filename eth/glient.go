@@ -207,7 +207,38 @@ func countAccountsWithDBGetMetrics(eth *Ethereum) {
 }
 
 
+func countTransactions(eth *Ethereum) {
+	var blockNum = 0
+	var trans = 0
+	var blocks = 0
 
+	fmt.Printf("%s Starting to count transactions...\n", now())
+
+	var printEvery = 10000
+
+	for {
+		blck := blockNum
+		blockNum += 1
+
+		block := eth.blockchain.GetBlockByNumber(uint64(blck))
+		if block == nil {
+			break
+		}
+
+		trans = trans + block.Transactions().Len()
+
+		blocks += 1
+
+		if blocks % printEvery == 0 {
+			fmt.Printf("%s %v blocks processed. Number of transactions til block number %v: %v transactions.\n",
+				now(), blocks, blck, trans)
+		}
+	}
+
+	fmt.Printf("Total blocks processed: %v Total transactions: %v\n", blocks, trans)
+	fmt.Printf("%s Exiting process.\n", now())
+
+}
 
 
 
