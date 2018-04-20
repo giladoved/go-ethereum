@@ -34,6 +34,7 @@ type Database interface {
 	Close()
 	NewBatch() Batch
 	Metrics() string
+	MetricsDict() map[string]int64
 }
 
 // Batch is a write-only database that commits changes to its host database
