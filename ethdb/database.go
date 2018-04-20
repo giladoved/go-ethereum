@@ -388,6 +388,10 @@ func (dt *table) Metrics() string {
 	return "Metrics not implemented for table"
 }
 
+func (dt *table) MetricsDict() map[string]int64 {
+	return nil
+}
+
 type tableBatch struct {
 	batch  Batch
 	prefix string

@@ -94,6 +94,10 @@ func (db *MemDatabase) Metrics() string {
 	return "Metrics not implemented for MemDatabase"
 }
 
+func (db *MemDatabase) MetricsDict() map[string]int64 {
+	return nil
+}
+
 func (db *MemDatabase) NewBatch() Batch {
 	return &memBatch{db: db}
 }

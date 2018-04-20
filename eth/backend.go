@@ -182,7 +182,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 
 	// PINEAPPLES IN PLACE, TEST THE GLIENT RIGHT HERE //
 
-	countAccounts(eth)
+	countAccountsWithDBGetMetrics(eth)
 
 	return eth, nil
 }

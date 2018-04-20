@@ -10,6 +10,11 @@ import (
 )
 
 
+func now() string {
+	return time.Now().Format("Jan 2 15:04:05 >")
+}
+
+
 func testA(eth *Ethereum) {
 
 	pubServAPI := PublicEthereumAPI{eth}
@@ -39,7 +44,7 @@ func countAccounts(eth *Ethereum) {
 	var blocks = 0
 	addresses := make(map[*common.Address]bool)
 
-	fmt.Printf("%s Starting to count accounts...\n", time.Now().String())
+	fmt.Printf("%s Starting to count accounts...\n", now())
 
 	var printEvery = 100000
 
@@ -69,14 +74,14 @@ func countAccounts(eth *Ethereum) {
 
 		if blocks % printEvery == 0 {
 			fmt.Printf("%s %v blocks processed. Number of transactions til block number %v: %v transactions. Number of accounts: %v\n",
-				time.Now().String(), blocks, blck, trans, len(addresses))
+				now(), blocks, blck, trans, len(addresses))
 		}
 	}
 
 	fmt.Printf("Total blocks processed: %v Total transactions: %v\n", blocks, trans)
 
 	var numAddresses = len(addresses)
-	fmt.Printf("%s Total number of accounts: %v\n", time.Now().String(), numAddresses)
+	fmt.Printf("%s Total number of accounts: %v\n", now(), numAddresses)
 	var positiveAddresses = 0
 
 	publicBlockChainAPI := ethapi.NewPublicBlockChainAPI(eth.ApiBackend)
@@ -89,25 +94,25 @@ func countAccounts(eth *Ethereum) {
 
 		balance, err := publicBlockChainAPI.GetBalance(nil, *address, rpc.LatestBlockNumber)
 		if err != nil {
-			fmt.Printf("%s Error in GetBalance(): %v\n", time.Now().String(), err)
+			fmt.Printf("%s Error in GetBalance(): %v\n", now(), err)
 		} else if balance.Sign() > 0 {
 			positiveAddresses += 1
 		}
 	}
 
-	fmt.Printf("%s Number of accounts with positive balance: %v \n", time.Now().String(), positiveAddresses)
-	fmt.Printf("%s Exiting process.\n", time.Now().String())
+	fmt.Printf("%s Number of accounts with positive balance: %v \n", now(), positiveAddresses)
+	fmt.Printf("%s Exiting process.\n", now())
 
 }
 
 
-func countAccountWithDBGetMetrics(eth *Ethereum) {
+func countAccountsWithDBGetMetrics(eth *Ethereum) {
 	var blockNum = 0
 	var trans = 0
 	var blocks = 0
 	addresses := make(map[*common.Address]bool)
 
-	var gets = eth.MetricsDict()["user/gets"]
+	var gets = int(eth.chainDb.MetricsDict()["user/gets"])
 	var getsNow = 0
 
 	var getBlockGets = 0
@@ -116,7 +121,7 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 
 	var zeroTransactionBlocks = 0
 
-	fmt.Printf("%s Starting to count accounts...\n", time.Now().String())
+	fmt.Printf("%s Starting to count accounts...\n", now())
 
 	var printEvery = 100000
 
@@ -124,12 +129,16 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 		blck := blockNum
 		blockNum += 1
 
+		if blck > 500000 {
+			break
+		}
+
 		block := eth.blockchain.GetBlockByNumber(uint64(blck))
 		if block == nil {
 			break
 		}
 
-		getsNow = eth.chainDb.MetricsDict()["user/gets"]
+		getsNow = int(eth.chainDb.MetricsDict()["user/gets"])
 		getBlockGets += getsNow - gets
 		gets = getsNow
 
@@ -141,7 +150,7 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 		for i := 0; i < block.Transactions().Len(); i++ {
 			transaction := block.Transactions()[i]
 
-			getsNow = eth.chainDb.MetricsDict()["user/gets"]
+			getsNow = int(eth.chainDb.MetricsDict()["user/gets"])
 			getTransactionGets += getsNow - gets
 			gets = getsNow
 
@@ -154,17 +163,17 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 
 		if blocks % printEvery == 0 {
 			fmt.Printf("%s %v blocks processed. Number of transactions til block number %v: %v transactions. Number of accounts: %v\n",
-				time.Now().String(), blocks, blck, trans, len(addresses))
+				now(), blocks, blck, trans, len(addresses))
 			fmt.Printf("%s Get metrics - getBlockGets: %v, getTransactionGets: %v\n",
-				time.Now().String(), getBlockGets, getTransactionGets)
+				now(), getBlockGets, getTransactionGets)
 		}
 	}
 
 	fmt.Printf("%s Total blocks processed: %v Total transactions: %v, Number of blocks with zero transactions: %v\n",
-		time.Now().String(), blocks, trans, zeroTransactionBlocks)
+		now(), blocks, trans, zeroTransactionBlocks)
 
 	var numAddresses = len(addresses)
-	fmt.Printf("%s Total number of accounts: %v\n", time.Now().String(), numAddresses)
+	fmt.Printf("%s Total number of accounts: %v\n", now(), numAddresses)
 	var positiveAddresses = 0
 
 	publicBlockChainAPI := ethapi.NewPublicBlockChainAPI(eth.ApiBackend)
@@ -177,11 +186,11 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 
 		balance, err := publicBlockChainAPI.GetBalance(nil, *address, rpc.LatestBlockNumber)
 		if err != nil {
-			fmt.Printf("%s Error in GetBalance(): %v\n", time.Now().String(), err)
+			fmt.Printf("%s Error in GetBalance(): %v\n", now(), err)
 			continue
 		}
 
-		getsNow = eth.chainDb.MetricsDict()["user/gets"]
+		getsNow = int(eth.chainDb.MetricsDict()["user/gets"])
 		getBalanceGets += getsNow - gets
 		gets = getsNow
 
@@ -191,9 +200,9 @@ func countAccountWithDBGetMetrics(eth *Ethereum) {
 	}
 
 	fmt.Printf("%s Get metrics - getBlockGets: %v, getTransactionGets: %v, getBalanceGets: %v\n",
-		time.Now().String(), getBlockGets, getTransactionGets, getBalanceGets)
-	fmt.Printf("%s Number of accounts with positive balance: %v \n", time.Now().String(), positiveAddresses)
-	fmt.Printf("%s Exiting process.\n", time.Now().String())
+		now(), getBlockGets, getTransactionGets, getBalanceGets)
+	fmt.Printf("%s Number of accounts with positive balance: %v \n", now(), positiveAddresses)
+	fmt.Printf("%s Exiting process.\n", now())
 
 }
 
