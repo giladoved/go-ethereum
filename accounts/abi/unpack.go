@@ -25,8 +25,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+var (
+	maxUint256 = big.NewInt(0).Add(
+		big.NewInt(0).Exp(big.NewInt(2), big.NewInt(256), nil),
+		big.NewInt(-1))
+	maxInt256 = big.NewInt(0).Add(
+		big.NewInt(0).Exp(big.NewInt(2), big.NewInt(255), nil),
+		big.NewInt(-1))
+)
+
 // reads the integer based on its kind
-func readInteger(kind reflect.Kind, b []byte) interface{} {
+func readInteger(typ byte, kind reflect.Kind, b []byte) interface{} {
 	switch kind {
 	case reflect.Uint8:
 		return b[len(b)-1]
@@ -45,7 +54,20 @@ func readInteger(kind reflect.Kind, b []byte) interface{} {
 	case reflect.Int64:
 		return int64(binary.BigEndian.Uint64(b[len(b)-8:]))
 	default:
-		return new(big.Int).SetBytes(b)
+		// the only case lefts for integer is int256/uint256.
+		// big.SetBytes can't tell if a number is negative, positive on itself.
+		// On EVM, if the returned number > max int256, it is negative.
+		ret := new(big.Int).SetBytes(b)
+		if typ == UintTy {
+			return ret
+		}
+
+		if ret.Cmp(maxInt256) > 0 {
+			ret.Add(maxUint256, big.NewInt(0).Neg(ret))
+			ret.Add(ret, big.NewInt(1))
+			ret.Neg(ret)
+		}
+		return ret
 	}
 }
 
@@ -93,6 +115,17 @@ func readFixedBytes(t Type, word []byte) (interface{}, error) {
 
 }
 
+func getFullElemSize(elem *Type) int {
+	//all other should be counted as 32 (slices have pointers to respective elements)
+	size := 32
+	//arrays wrap it, each element being the same size
+	for elem.T == ArrayTy {
+		size *= elem.Size
+		elem = elem.Elem
+	}
+	return size
+}
+
 // iteratively unpack elements
 func forEachUnpack(t Type, output []byte, start, size int) (interface{}, error) {
 	if size < 0 {
@@ -104,7 +137,6 @@ func forEachUnpack(t Type, output []byte, start, size int) (interface{}, error) 
 
 	// this value will become our slice or our array, depending on the type
 	var refSlice reflect.Value
-	slice := output[start : start+size*32]
 
 	if t.T == SliceTy {
 		// declare our slice
@@ -116,15 +148,20 @@ func forEachUnpack(t Type, output []byte, start, size int) (interface{}, error) 
 		return nil, fmt.Errorf("abi: invalid type in array/slice unpacking stage")
 	}
 
-	for i, j := start, 0; j*32 < len(slice); i, j = i+32, j+1 {
-		// this corrects the arrangement so that we get all the underlying array values
-		if t.Elem.T == ArrayTy && j != 0 {
-			i = start + t.Elem.Size*32*j
-		}
+	// Arrays have packed elements, resulting in longer unpack steps.
+	// Slices have just 32 bytes per element (pointing to the contents).
+	elemSize := 32
+	if t.T == ArrayTy {
+		elemSize = getFullElemSize(t.Elem)
+	}
+
+	for i, j := start, 0; j < size; i, j = i+elemSize, j+1 {
+
 		inter, err := toGoType(i, *t.Elem, output)
 		if err != nil {
 			return nil, err
 		}
+
 		// append the item to our reflect slice
 		refSlice.Index(j).Set(reflect.ValueOf(inter))
 	}
@@ -164,7 +201,7 @@ func toGoType(index int, t Type, output []byte) (interface{}, error) {
 	case StringTy: // variable arrays are written at the end of the return bytes
 		return string(output[begin : begin+end]), nil
 	case IntTy, UintTy:
-		return readInteger(t.Kind, returnOutput), nil
+		return readInteger(t.T, t.Kind, returnOutput), nil
 	case BoolTy:
 		return readBool(returnOutput)
 	case AddressTy:
